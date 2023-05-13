@@ -14,7 +14,11 @@ async function main() {
   console.log(
     `DAlign deployed to ${contract.address}`
   );
+
+
 }
+
+  
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.

@@ -39,19 +39,24 @@ contract DAlign {
 
     function createPrompt(string memory content) public {
         bytes32 id = keccak256(bytes(content));
+        // ensure the id doesnt exist 
+        require(prompts[id].id == bytes32(0), "The prompt already exits");
         prompts[id] = Prompt(id, content, 0, 0, msg.sender);
         emit PromptCreated(id, content, msg.sender);
     }
 
     function addAnswer(bytes32 promptId, string memory content) public {
         // You cannot add more than one answer
-        bytes32[] storage _answers = promptToAnswers[promptId];
+        //bytes32[] storage _answers = promptToAnswers[promptId];
         //for (uint256 i = 0; i < _answers.length; i++) {
         //    if (answers[_answers[i]].submittedBy == msg.sender) {
         //        revert("You can only add one answer to a prompt");
         //    }
         //}
-        bytes32 id = keccak256(bytes(content));
+        bytes32 id = keccak256(abi.encodePacked(content, promptId));
+        // ensure that the answer doesnt exist
+        require(answers[id].id == bytes32(0), "The answer already exists");
+
         answers[id] = Answer(id, content, DEFAULT_ELO_SCORE, 0, msg.sender);
         promptToAnswers[promptId].push(id);
         emit AnswerAdded(promptId, id, content, msg.sender);

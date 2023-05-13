@@ -44,6 +44,13 @@ contract DAlign {
     }
 
     function addAnswer(bytes32 promptId, string memory content) public {
+        // You cannot add more than one answer
+        bytes32[] storage _answers = promptToAnswers[promptId];
+        //for (uint256 i = 0; i < _answers.length; i++) {
+        //    if (answers[_answers[i]].submittedBy == msg.sender) {
+        //        revert("You can only add one answer to a prompt");
+        //    }
+        //}
         bytes32 id = keccak256(bytes(content));
         answers[id] = Answer(id, content, DEFAULT_ELO_SCORE, 0, msg.sender);
         promptToAnswers[promptId].push(id);
@@ -53,6 +60,8 @@ contract DAlign {
     function rateAnswers(bytes32 promptId, bytes32 winnerId, bytes32 loserId) public {
         Answer storage winner = answers[winnerId];
         Answer storage loser = answers[loserId];
+        //require(winner.submittedBy != msg.sender, "You cannot vote on your own submissions");
+        //require(loser.submittedBy != msg.sender, "You cannot vote on your own submissions");
 
         SD59x18 expectedWinnerScore = convert(1).div(convert(1) + convert(10).pow(loser.eloScore.sub(winner.eloScore)).div(convert(400)));
         SD59x18 expectedLoserScore = convert(1).div(convert(1) + convert(10).pow(winner.eloScore.sub(loser.eloScore)).div(convert(400)));
@@ -68,6 +77,7 @@ contract DAlign {
 
     function evaluatePromptQuality(bytes32 promptId, uint256 quality) public {
         require(quality <= 4, "Quality is not between 0-4");
+        //require(prompts[promptId].submittedBy != msg.sender, "You cannot vote on your own submissions");
         prompts[promptId].totalQuality = quality * 25; // Top score 100, lowest score 0
         prompts[promptId].numberOfQualityVotes += 1;
         emit PromptQualityEvaluated(promptId, prompts[promptId].totalQuality, prompts[promptId].numberOfQualityVotes, msg.sender);

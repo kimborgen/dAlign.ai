@@ -5,15 +5,12 @@ import Grid from '@mui/material/Unstable_Grid2'; // Grid version 2
 import Box from '@mui/material/Box'; // Grid version 2
 import Button from '@mui/material/Button'
 
-export default function PromptAnswer({handleSubmit}) {
-    const [prompt, setPrompt] = useState('');
+export default function Answer({ prompt }) {
+    // const [prompt, setPrompt] = useState('');
     const [answer, setAnswer] = useState('');
-    
-    const handleButton = () => {
-        handleSubmit("PromptAnswer", {
-            prompt: prompt,
-            answer: answer,
-        })
+
+    const handleSubmit = () => {
+        console.log(prompt, answer);
     }
     
     return (
@@ -22,6 +19,7 @@ export default function PromptAnswer({handleSubmit}) {
             direction="column" 
             alignItems="center"
             justifyContent="center"
+            backgroundColor="yellow" 
             > 
             <TextField
                 sx={{width: "100%", height:"30vh"}}
@@ -30,7 +28,8 @@ export default function PromptAnswer({handleSubmit}) {
                 multiline
                 variant="standard"
                 value={prompt}
-                onChange={event => setPrompt(event.target.value)}
+                //onChange={event => setPrompt(event.target.value)}
+                disabled
             />
             <TextField
                 sx={{width: "100%", height: "30vh"}}
@@ -41,7 +40,7 @@ export default function PromptAnswer({handleSubmit}) {
                 value={answer}
                 onChange={event => setAnswer(event.target.value)}
             />
-            <Button onClick={handleButton}>Submit</Button>
+            <Button onClick={handleSubmit} />
         </Grid>
     )
 }

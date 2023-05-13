@@ -2,6 +2,11 @@ import logo from './logo.svg';
 import './App.css';
 import Box from '@mui/material/Box';
 import Main from "./components/Main.jsx"
+import { ThemeProvider, createTheme} from "@mui/material";
+import { SafeThemeProvider } from '@safe-global/safe-react-components'
+
+
+
 
 function App() {
   return (
@@ -9,10 +14,16 @@ function App() {
       sx={{
         height: '100vh',
         width: '100vw',
-        backgroundColor: '#EEEEEE',
+        backgroundColor: '#444444',
       }}
     >
-      <Main />
+      <SafeThemeProvider mode="dark">
+      {(safeTheme) => (
+        <ThemeProvider theme={safeTheme}>
+          <Main />
+        </ThemeProvider>
+      )}
+      </SafeThemeProvider>
     </Box>
   );
 }

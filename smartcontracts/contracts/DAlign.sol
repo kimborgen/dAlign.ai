@@ -8,6 +8,7 @@ contract DAlign {
         string content;
         SD59x18 eloScore;
         uint256 numberOfRatings;
+        address submittedBy;
     }
 
     struct Prompt {
@@ -15,6 +16,7 @@ contract DAlign {
         string content;
         uint256 totalQuality;
         uint256 numberOfQualityVotes;
+        address submittedBy;
     }
 
     // The K rating used to update ELOSCORE
@@ -25,10 +27,10 @@ contract DAlign {
     mapping(bytes32 => Answer) public answers;
     mapping(bytes32 => bytes32[]) public promptToAnswers;
 
-    event PromptCreated(bytes32 id);
-    event AnswerAdded(bytes32 promptId, bytes32 answerId);
-    event AnswersRated(bytes32 promptId, bytes32 winningAnswerId, bytes32 losingAnswerId, SD59x18 newWinnerElo, SD59x18 newLoserElo);
-    event PromptQualityEvaluated(bytes32 promptId, uint256 newTotalQuality, uint256 newNumberOfQualityVotes);
+    event PromptCreated(bytes32 id, string content, address submittedBy);
+    event AnswerAdded(bytes32 promptId, bytes32 answerId, string content, address submittedBy);
+    event AnswersRated(bytes32 promptId, bytes32 winningAnswerId, bytes32 losingAnswerId, SD59x18 newWinnerElo, SD59x18 newLoserElo, address submittedBy);
+    event PromptQualityEvaluated(bytes32 promptId, uint256 newTotalQuality, uint256 newNumberOfQualityVotes, address submittedBy);
 
     constructor() {
         K_RATING = convert(32);
@@ -37,15 +39,15 @@ contract DAlign {
 
     function createPrompt(string memory content) public {
         bytes32 id = keccak256(bytes(content));
-        prompts[id] = Prompt(id, content, 0, 0);
-        emit PromptCreated(id);
+        prompts[id] = Prompt(id, content, 0, 0, msg.sender);
+        emit PromptCreated(id, content, msg.sender);
     }
 
     function addAnswer(bytes32 promptId, string memory content) public {
         bytes32 id = keccak256(bytes(content));
-        answers[id] = Answer(id, content, DEFAULT_ELO_SCORE, 0);
+        answers[id] = Answer(id, content, DEFAULT_ELO_SCORE, 0, msg.sender);
         promptToAnswers[promptId].push(id);
-        emit AnswerAdded(promptId, id);
+        emit AnswerAdded(promptId, id, content, msg.sender);
     }
 
     function rateAnswers(bytes32 promptId, bytes32 winnerId, bytes32 loserId) public {
@@ -60,12 +62,14 @@ contract DAlign {
 
         winner.numberOfRatings += 1;
         loser.numberOfRatings += 1;
+
+        emit AnswersRated(promptId, winnerId, loserId, winner.eloScore, loser.eloScore, msg.sender);
     }
 
     function evaluatePromptQuality(bytes32 promptId, uint256 quality) public {
         require(quality <= 4, "Quality is not between 0-4");
         prompts[promptId].totalQuality = quality * 25; // Top score 100, lowest score 0
         prompts[promptId].numberOfQualityVotes += 1;
-        emit PromptQualityEvaluated(promptId, prompts[promptId].totalQuality, prompts[promptId].numberOfQualityVotes );
+        emit PromptQualityEvaluated(promptId, prompts[promptId].totalQuality, prompts[promptId].numberOfQualityVotes, msg.sender);
     }
 }

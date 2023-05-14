@@ -22,6 +22,7 @@ import { withApollo } from '@apollo/react-hoc';
 //import Answer from './Answer'
 import AddAnswer from './AddAnswer';
 import RateAnswers from './RateAnswers'
+import AddPromptEval from './AddPromptEval';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
@@ -218,6 +219,9 @@ function App({client}) {
     } else if (task == "AddPrompt") {
         const { data } = await contract.populateTransaction.createPrompt(content.prompt)
         txData = data
+    } else if (task == "AddPromptEval") {
+        const { data } = await contract.populateTransaction.evaluatePromptQuality(content.promptId, content.rating)
+        txData = data
     }
 
     console.log("txData", txData)
@@ -303,9 +307,10 @@ function App({client}) {
   if (start) {
     return ( //<RateAnswers handleSubmit={handleSubmit} />
     //<AddAnswer handleSubmit={handleSubmit}/>
+    //<AddPrompt handleSubmit={handleSubmit} />
         <>
             <AppBar onLogin={login} onLogout={logout} isLoggedIn={!!provider} />
-            <AddPrompt handleSubmit={handleSubmit} />
+            <AddPromptEval handleSubmit={handleSubmit} />
             
             <Snackbar open={successOpen} autoHideDuration={6000} onClose={handleSuccessClose}>
                 <Alert onClose={handleSuccessClose} severity="success" sx={{ width: '100%' }}>

@@ -270,47 +270,50 @@ function App({client}) {
       console.log(`Relay Transaction Task ID: https://relay.gelato.digital/tasks/status/${response.taskId}`)
 
       setSuccessOpen(true)
-    
+      refreshTask()
+      await sleep(1000)
+      nextTask()
 
   }
 
-  const nextTask = async () => {
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  
+
+  const [ component, setComponent ] = useState(<Box>Loading next task</Box>)
+
+  const refreshTask = () => {
+    setComponent(<Box>Loading next task</Box>)
+  }
+
+  const nextTask = () => {
     // You have 4 possible tasks, but I think we want to weigh ranking and evaluting quality
-
-    // Generate an answer to a prompt
-
-    
-
-
-    // get all anwsers 
-
-    // queryResult = await client.query({
-    //     query: gql`
-    //       query {
-    //         answerAddeds(
-    //             where: {promptId: "${prompt.DAlign_id}"}
-    //         )
-    //       }
-    //     `,
-    //   })
-
-
-    
+    const randomNumber = Math.floor(Math.random() * 100);
+    console.log("Random number", randomNumber)
+    if (randomNumber < 10 ) {
+        setComponent(<AddPrompt handleSubmit={handleSubmit} />)
+    } else if (randomNumber < 30) {
+       setComponent(<AddAnswer handleSubmit={handleSubmit}/>)
+    } else if (randomNumber < 60) {
+        setComponent(<AddPromptEval handleSubmit={handleSubmit} />)
+    } else {
+        setComponent(<RateAnswers handleSubmit={handleSubmit} />)
+    }
   }
 
   const [ start, setStart ] = useState(false)
 
   const startAligment = () => {
     setStart(true)
+    nextTask()
   }
 
   if (start) {
-    return ( //<RateAnswers handleSubmit={handleSubmit} />
-    //<AddAnswer handleSubmit={handleSubmit}/>
-    //<AddPrompt handleSubmit={handleSubmit} />
+    return ( 
         <>
             <AppBar onLogin={login} onLogout={logout} isLoggedIn={!!provider} />
-            <AddPromptEval handleSubmit={handleSubmit} />
+            {component}
             
             <Snackbar open={successOpen} autoHideDuration={6000} onClose={handleSuccessClose}>
                 <Alert onClose={handleSuccessClose} severity="success" sx={{ width: '100%' }}>

@@ -152,6 +152,7 @@ function RateAnswers({ handleSubmit, client }) {
                     />
                 </Button>
                 <Button
+                    disabled
                     sx={{width: '100%'}}
                     onClick={event => setChosen(2)}
                     >

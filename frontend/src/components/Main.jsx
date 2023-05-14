@@ -14,7 +14,7 @@ import AppBar from './AppBar'
 import { ethers } from 'ethers'
 import SafeApiKit from '@safe-global/api-kit'
 import Safe, { EthersAdapter, getSafeContract, SafeFactory, SafeAccountConfig } from '@safe-global/protocol-kit'
-import PromptAnswer from './PromptAnswer';
+import AddPrompt from './AddPrompt';
 import { GelatoRelayPack } from '@safe-global/relay-kit'
 import { MetaTransactionData, MetaTransactionOptions, OperationType } from '@safe-global/safe-core-sdk-types'
 import { useQuery, gql } from "@apollo/client";
@@ -215,6 +215,9 @@ function App({client}) {
     } else if (task == "AddAnswer") {
         const { data } = await contract.populateTransaction.addAnswer(content.promptId, content.answer);
         txData = data
+    } else if (task == "AddPrompt") {
+        const { data } = await contract.populateTransaction.createPrompt(content.prompt)
+        txData = data
     }
 
     console.log("txData", txData)
@@ -299,9 +302,10 @@ function App({client}) {
 
   if (start) {
     return ( //<RateAnswers handleSubmit={handleSubmit} />
+    //<AddAnswer handleSubmit={handleSubmit}/>
         <>
             <AppBar onLogin={login} onLogout={logout} isLoggedIn={!!provider} />
-            <AddAnswer handleSubmit={handleSubmit}/>
+            <AddPrompt handleSubmit={handleSubmit} />
             
             <Snackbar open={successOpen} autoHideDuration={6000} onClose={handleSuccessClose}>
                 <Alert onClose={handleSuccessClose} severity="success" sx={{ width: '100%' }}>

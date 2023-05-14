@@ -17,6 +17,7 @@ function RateAnswers({ handleSubmit, client }) {
     const [chosen, setChosen ] = useState(undefined);
     
     const getData = async () => {
+        
          // First get all prompts
          console.log("Cl;iten ", client)
          let queryResult = await client.query({

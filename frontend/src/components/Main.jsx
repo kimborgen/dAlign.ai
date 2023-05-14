@@ -19,7 +19,8 @@ import { GelatoRelayPack } from '@safe-global/relay-kit'
 import { MetaTransactionData, MetaTransactionOptions, OperationType } from '@safe-global/safe-core-sdk-types'
 import { useQuery, gql } from "@apollo/client";
 import { withApollo } from '@apollo/react-hoc';    
-import Answer from './Answer'
+//import Answer from './Answer'
+import AddAnswer from './AddAnswer';
 import RateAnswers from './RateAnswers'
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
@@ -200,78 +201,68 @@ function App({client}) {
     console.log("before ethers contract")
     const contract = new ethers.Contract(dAlignContractAddress, ABI, signer);
     console.log("after ethers contract")
+    const options = {
+        gasLimit,
+        isSponsored: true
+    }
+    const relayKit = new GelatoRelayPack(gelatoAPIKey)
+
+    let txData
 
     if (task == "RateAnswers") {
         const { data } = await contract.populateTransaction.rateAnswers(content.promptId, content.winner, content.loser);
-        console.log("Transaction data: ", data)
-        const safeTransactionData = {
-            to: dAlignContractAddress,
-            data: data,
-            value: 0,
-            operation: OperationType.Call
-          }
-        const options = {
-            gasLimit,
-            isSponsored: true
-        }
-
-        console.log("aaa")
-
-        // const ethAdapter = new EthersAdapter({
-        //     ethers,
-        //     signerOrProvider: signer
-        // })
-
-        console.log("bbb")
-
-        // const safeSDK = await Safe.create({
-        //     ethAdapter,
-        //     safeAddress
-        // })
-
-        console.log("ccc")
-
-        const relayKit = new GelatoRelayPack(gelatoAPIKey)
-
-        console.log("ddd")
-
-        const safeTransaction = await safeSDK.createTransaction({ safeTransactionData })
-        console.log("eee", safeTransaction)
-        const signedSafeTx = await safeSDK.signTransaction(safeTransaction)
-        console.log("fff", signedSafeTx)
-        const safeSingletonContract = await getSafeContract({ ethAdapter, safeVersion: await safeSDK.getContractVersion() })
-        console.log("ggg", safeSingletonContract)
-
-        const encodedTx = safeSingletonContract.encode('execTransaction', [
-            signedSafeTx.data.to,
-            signedSafeTx.data.value,
-            signedSafeTx.data.data,
-            signedSafeTx.data.operation,
-            signedSafeTx.data.safeTxGas,
-            signedSafeTx.data.baseGas,
-            signedSafeTx.data.gasPrice,
-            signedSafeTx.data.gasToken,
-            signedSafeTx.data.refundReceiver,
-            signedSafeTx.encodedSignatures()
-        ])
-        console.log("hhh", encodedTx)
-
-        const relayTransaction = {
-            target: safeAddress,
-            encodedTransaction: encodedTx,
-            chainId,
-            options
-          }
-          console.log("relayTrans", relayTransaction)
-          const response = await relayKit.relayTransaction(relayTransaction)
-
-          console.log("iii")
-          
-          console.log(`Relay Transaction Task ID: https://relay.gelato.digital/tasks/status/${response.taskId}`)
-
-          setSuccessOpen(true)
+        txData = data
+    } else if (task == "AddAnswer") {
+        const { data } = await contract.populateTransaction.addAnswer(content.promptId, content.answer);
+        txData = data
     }
 
+    console.log("txData", txData)
+
+    const safeTransactionData = {
+        to: dAlignContractAddress,
+        data: txData,
+        value: 0,
+        operation: OperationType.Call
+      }
+
+    console.log("ddd")
+
+    const safeTransaction = await safeSDK.createTransaction({ safeTransactionData })
+    console.log("eee", safeTransaction)
+    const signedSafeTx = await safeSDK.signTransaction(safeTransaction)
+    console.log("fff", signedSafeTx)
+    const safeSingletonContract = await getSafeContract({ ethAdapter, safeVersion: await safeSDK.getContractVersion() })
+    console.log("ggg", safeSingletonContract)
+
+    const encodedTx = safeSingletonContract.encode('execTransaction', [
+        signedSafeTx.data.to,
+        signedSafeTx.data.value,
+        signedSafeTx.data.data,
+        signedSafeTx.data.operation,
+        signedSafeTx.data.safeTxGas,
+        signedSafeTx.data.baseGas,
+        signedSafeTx.data.gasPrice,
+        signedSafeTx.data.gasToken,
+        signedSafeTx.data.refundReceiver,
+        signedSafeTx.encodedSignatures()
+    ])
+    console.log("hhh", encodedTx)
+
+    const relayTransaction = {
+        target: safeAddress,
+        encodedTransaction: encodedTx,
+        chainId,
+        options
+      }
+      console.log("relayTrans", relayTransaction)
+      const response = await relayKit.relayTransaction(relayTransaction)
+
+      console.log("iii")
+      
+      console.log(`Relay Transaction Task ID: https://relay.gelato.digital/tasks/status/${response.taskId}`)
+
+      setSuccessOpen(true)
     
 
   }
@@ -307,10 +298,11 @@ function App({client}) {
   }
 
   if (start) {
-    return (
+    return ( //<RateAnswers handleSubmit={handleSubmit} />
         <>
             <AppBar onLogin={login} onLogout={logout} isLoggedIn={!!provider} />
-            <RateAnswers handleSubmit={handleSubmit} />
+            <AddAnswer handleSubmit={handleSubmit}/>
+            
             <Snackbar open={successOpen} autoHideDuration={6000} onClose={handleSuccessClose}>
                 <Alert onClose={handleSuccessClose} severity="success" sx={{ width: '100%' }}>
                     Success!

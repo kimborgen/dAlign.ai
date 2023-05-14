@@ -112,6 +112,7 @@ function App({client}) {
   }, [])
 
   const login = async () => {
+    console.log("login", !safeAuth)
     if (!safeAuth) return
     console.log("GHET", safeAuth)
     const response = await safeAuth.signIn()
